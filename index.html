@@ -58,29 +58,24 @@
     const error = params.get('error');
     const content = document.getElementById('content');
 
+    // Your Expo tunnel URL
+    const EXPO_URL = 'exp://eh6suei-anonymous-8081.exp.direct';
+
     if (code) {
+      const encodedCode = encodeURIComponent(code);
+      const expoRedirect = EXPO_URL + '/--/auth?code=' + encodedCode;
+
       content.innerHTML = `
         <div class="success">✓ eBay Login Successful!</div>
         <p>Redirecting you back to SnapLister...</p>
         <p style="font-size:0.8em; color:#5A5A66;">If the app doesn't open automatically, tap the button below.</p>
-        <a class="btn" href="exp://127.0.0.1:8081/--/auth?code=${encodeURIComponent(code)}">
-          Open SnapLister
-        </a>
+        <a class="btn" href="${expoRedirect}">Open SnapLister</a>
       `;
 
-      // Try multiple redirect schemes
-      const expoUrl = `exp://127.0.0.1:8081/--/auth?code=${encodeURIComponent(code)}`;
-      const appUrl = `snaplister://auth?code=${encodeURIComponent(code)}`;
-
-      // Try Expo Go scheme first (for development)
+      // Auto redirect after short delay
       setTimeout(() => {
-        window.location.href = expoUrl;
-      }, 800);
-
-      // Fallback to app scheme
-      setTimeout(() => {
-        window.location.href = appUrl;
-      }, 1500);
+        window.location.href = expoRedirect;
+      }, 1000);
 
     } else if (error) {
       content.innerHTML = `
