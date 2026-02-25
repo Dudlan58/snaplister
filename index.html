@@ -16,51 +16,82 @@
       margin: 0;
       text-align: center;
       padding: 20px;
+      box-sizing: border-box;
     }
     h1 { font-size: 2em; margin-bottom: 10px; }
     .orange { color: #FF6B1A; }
-    p { color: #8E8E99; margin-bottom: 30px; }
-    .code-box {
+    p { color: #8E8E99; margin-bottom: 20px; line-height: 1.6; }
+    .box {
       background: #1C1C1F;
       border: 1px solid #2A2A2F;
       border-radius: 12px;
-      padding: 20px;
-      word-break: break-all;
-      font-family: monospace;
-      font-size: 0.85em;
-      max-width: 100%;
-      display: none;
+      padding: 24px;
+      max-width: 400px;
+      width: 100%;
     }
-    .status { color: #22C55E; font-weight: bold; margin-bottom: 10px; }
+    .success { color: #22C55E; font-size: 1.2em; font-weight: bold; margin-bottom: 12px; }
+    .error { color: #EF4444; font-size: 1.2em; font-weight: bold; margin-bottom: 12px; }
+    .btn {
+      background: #FF6B1A;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 28px;
+      font-size: 1em;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 12px;
+    }
   </style>
 </head>
 <body>
   <h1>Snap<span class="orange">Lister</span></h1>
-  <p id="message">Completing eBay authentication...</p>
-  <div class="code-box" id="codebox">
-    <div class="status">✓ Authentication successful</div>
-    <p style="color:#8E8E99; font-size:0.9em;">Return to the app — it should open automatically.<br>If not, tap Back on your phone.</p>
+  <div class="box" id="content">
+    <p>Loading...</p>
   </div>
 
   <script>
-    // Try to pass the auth code back to the Expo app
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
     const error = params.get('error');
+    const content = document.getElementById('content');
 
     if (code) {
-      document.getElementById('message').style.display = 'none';
-      document.getElementById('codebox').style.display = 'block';
+      content.innerHTML = `
+        <div class="success">✓ eBay Login Successful!</div>
+        <p>Redirecting you back to SnapLister...</p>
+        <p style="font-size:0.8em; color:#5A5A66;">If the app doesn't open automatically, tap the button below.</p>
+        <a class="btn" href="exp://127.0.0.1:8081/--/auth?code=${encodeURIComponent(code)}">
+          Open SnapLister
+        </a>
+      `;
 
-      // Try to redirect back to the app using the custom scheme
+      // Try multiple redirect schemes
+      const expoUrl = `exp://127.0.0.1:8081/--/auth?code=${encodeURIComponent(code)}`;
+      const appUrl = `snaplister://auth?code=${encodeURIComponent(code)}`;
+
+      // Try Expo Go scheme first (for development)
       setTimeout(() => {
-        window.location.href = 'snaplister://auth?code=' + encodeURIComponent(code);
-      }, 500);
+        window.location.href = expoUrl;
+      }, 800);
+
+      // Fallback to app scheme
+      setTimeout(() => {
+        window.location.href = appUrl;
+      }, 1500);
 
     } else if (error) {
-      document.getElementById('message').textContent = 'Authentication declined. You can close this page.';
+      content.innerHTML = `
+        <div class="error">✗ Login Declined</div>
+        <p>You declined the eBay login. Close this page and try again in SnapLister.</p>
+      `;
     } else {
-      document.getElementById('message').textContent = 'SnapLister — AI-powered eBay listings.';
+      content.innerHTML = `
+        <p style="color:#F2F2F7; font-weight:bold;">SnapLister</p>
+        <p>AI-powered eBay listing app.</p>
+      `;
     }
   </script>
 </body>
